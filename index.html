@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Calculator</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        body {
+            background-color: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+            height: 100vh;
+            padding-bottom: 20px;
+        }
+        .calc-container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
+        }
+        .display {
+            width: 100%;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-end;
+            padding: 10px 20px;
+            word-break: break-all;
+        }
+        .history-expr {
+            color: #727272;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            min-height: 2rem;
+        }
+        .current-input {
+            color: #ffffff;
+            font-size: 3.2rem;
+            font-weight: 300;
+        }
+        .divider {
+            height: 1px;
+            background-color: #2c2c2c;
+            margin: 15px 10px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 14px;
+        }
+        button {
+            border: none;
+            outline: none;
+            height: 75px;
+            border-radius: 50%;
+            font-size: 1.75rem;
+            font-weight: 400;
+            cursor: pointer;
+            transition: opacity 0.1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        button:active {
+            opacity: 0.6;
+        }
+        /* Samsung One UI Specific Color Schemes */
+        .btn-num {
+            background-color: #1a1a1a;
+            color: #ffffff;
+        }
+        .btn-func {
+            background-color: #000000;
+            color: #a5a5a5;
+            font-size: 1.5rem;
+        }
+        .btn-op {
+            background-color: #000000;
+            color: #ff9f0a; /* Samsung vivid operational orange */
+            font-size: 2rem;
+        }
+        .btn-clear {
+            color: #ff453a; /* Clear red tint */
+        }
+        .btn-equal {
+            background-color: #2f865a; /* Samsung One UI classic green equals button */
+            color: #ffffff;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="calc-container">
+    <div class="display">
+        <div class="history-expr" id="history"></div>
+        <div class="current-input" id="output">0</div>
+    </div>
+    <div class="divider"></div>
+    <div class="grid">
+        <button class="btn-func btn-clear" onclick="clearAll()">C</button>
+        <button class="btn-func" onclick="append('(')">(</button>
+        <button class="btn-func" onclick="append(')')">)</button>
+        <button class="btn-op" onclick="append('/')">÷</button>
+
+        <button class="btn-num" onclick="append('7')">7</button>
+        <button class="btn-num" onclick="append('8')">8</button>
+        <button class="btn-num" onclick="append('9')">9</button>
+        <button class="btn-op" onclick="append('*')">×</button>
+
+        <button class="btn-num" onclick="append('4')">4</button>
+        <button class="btn-num" onclick="append('5')">5</button>
+        <button class="btn-num" onclick="append('6')">6</button>
+        <button class="btn-op" onclick="append('-')">−</button>
+
+        <button class="btn-num" onclick="append('1')">1</button>
+        <button class="btn-num" onclick="append('2')">2</button>
+        <button class="btn-num" onclick="append('3')">3</button>
+        <button class="btn-op" onclick="append('+')">+</button>
+
+        <button class="btn-num" onclick="backspace()">⌫</button>
+        <button class="btn-num" onclick="append('0')">0</button>
+        <button class="btn-num" onclick="append('.')">.</button>
+        <button class="btn-equal" onclick="calculate()">=</button>
+    </div>
+</div>
+
+<script>
+    const outputDiv = document.getElementById('output');
+    const historyDiv = document.getElementById('history');
+    let currentInput = '0';
+    let isEvaluated = false;
+
+    function append(val) {
+        if (currentInput === '0' && !isNaN(val)) {
+            currentInput = val;
+        } else if (isEvaluated && isNaN(val)) {
+            isEvaluated = false;
+            currentInput += val;
+        } else if (isEvaluated && !isNaN(val)) {
+            isEvaluated = false;
+            currentInput = val;
+        } else {
+            currentInput += val;
+        }
+        updateDisplay();
+    }
+
+    function clearAll() {
+        currentInput = '0';
+        historyDiv.innerText = '';
+        updateDisplay();
+    }
+
+    function backspace() {
+        if (currentInput.length > 1) {
+            currentInput = currentInput.slice(0, -1);
+        } else {
+            currentInput = '0';
+        }
+        updateDisplay();
+    }
+
+    function calculate() {
+        try {
+            let expression = currentInput.replace(/×/g, '*').replace(/÷/g, '/').replace(/−/g, '-');
+            let result = eval(expression);
+            historyDiv.innerText = currentInput;
+            currentInput = Number(result.toFixed(8)).toString(); // handles decimal overflow nicely
+            isEvaluated = true;
+            updateDisplay();
+        } catch (error) {
+            outputDiv.innerText = 'Error';
+            setTimeout(clearAll, 1200);
+        }
+    }
+
+    function updateDisplay() {
+        // Visual polish to display clean operators
+        let visualText = currentInput.replace(/\*/g, '×').replace(/\//g, '÷');
+        outputDiv.innerText = visualText;
+    }
+</script>
+</body>
+</html>
